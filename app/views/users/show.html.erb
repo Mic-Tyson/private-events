@@ -1,0 +1,18 @@
+<p>Upcoming events</p>
+<% current_user.event_rsvps.upcoming.each do |event| %>
+<ul>
+  <li>
+    <%= event.title%> <%= event.date%>
+  </li>
+</ul>
+<% end %>
+
+
+<p>Past events</p>
+<% current_user.event_rsvps.expired.each do |event| %>
+<ul>
+  <li>
+    <%= event.title%> at <%= event.date%> 
+  </li>
+</ul>
+<% end %>

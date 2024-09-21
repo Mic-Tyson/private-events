@@ -1,0 +1,30 @@
+<% if user_signed_in? %>
+  <h3>User <%= current_user.id %></h3>
+<% end %>
+
+<h1><%= @event.title %></h1>
+<p>On <%= @event.date %>
+  <% if @event.expired? %>
+    (expired)
+  <% end %>
+</p>
+
+<div>Attendees
+  <ul>
+    <% @event.attendees.each do |attendee| %>
+      <li><%= attendee.id %></li>
+    <% end %>
+  </ul>
+</div>
+
+<% unless @event.expired? %>
+  <% if @event.attendees.include?(current_user) %>
+    <%= button_to "Remove RSVP", remove_rsvp_event_path(@event), method: :delete %>
+  <% else %>
+    <%= button_to "RSVP", rsvp_event_path(@event), method: :post %>
+  <% end %>
+<%end%>
+
+<%= link_to "All events", events_path %>
+
+<%= render "login", event: @event%>

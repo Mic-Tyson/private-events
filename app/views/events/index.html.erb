@@ -1,9 +1,38 @@
+<% if user_signed_in? %>
+<h3> User <%= current_user.id %> <h3>
+<%= link_to "User home", user_path(current_user) %>
+<% end %>
+
+
 <h1>Events</h1>
 
-<ul>
-  <% @events.each do |event| %>
+<p>Upcoming events</p>
+<% @events.upcoming.each do |event| %>
+  <ul>
     <li>
-      <%= link_to event.title, event %> 
+      <%= event.title%> <%= event.date%>
+      <%= link_to 'View Event', event_path(event), class: 'button' %>
+      <% if event.creator == current_user %>
+        <%= link_to "Edit event", edit_event_path(event.id) %>
+      <% end %>
     </li>
-  <% end %>
-</ul>
+  </ul>
+<% end %>
+
+
+<p>Past events</p>
+<% @events.expired.each do |event| %>
+  <ul>
+    <li>
+      <%= event.title%> at <%= event.date%> 
+      <%= link_to 'View Event', event_path(event), class: 'button' %>
+      <% if event.creator == current_user %>
+        <%= link_to "Edit event", edit_event_path(event.id) %>
+      <% end %>
+    </li>
+  </ul>
+<% end %>
+
+<%= link_to "New event", new_event_path %>
+
+<%= render "login", event: @event %>
