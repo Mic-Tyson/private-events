@@ -1,0 +1,8 @@
+<%= form_with url: invite_event_path(event), method: :post do |form| %>
+  <div>
+    <%= form.label :query, "User ID:" %>
+    <%= form.number_field :query %>
+  </div>
+  <%= form.submit "Invite" %>
+  <% end %>
+</form>

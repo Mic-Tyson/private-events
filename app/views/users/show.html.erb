@@ -1,18 +1,32 @@
 <p>Upcoming events</p>
-<% current_user.event_rsvps.upcoming.each do |event| %>
+<% current_user.confirmed_events.upcoming.each do |event| %>
 <ul>
   <li>
     <%= event.title%> <%= event.date%>
+    <% if event.creator == current_user %>
+      <%= link_to "Edit Event", edit_event_path(event) %>
+      <%= render "invite", event: event%>
+    <% end %>
   </li>
 </ul>
 <% end %>
 
 
 <p>Past events</p>
-<% current_user.event_rsvps.expired.each do |event| %>
+<% current_user.confirmed_events.expired.each do |event| %>
 <ul>
   <li>
     <%= event.title%> at <%= event.date%> 
   </li>
 </ul>
 <% end %>
+
+<p>Invitations</p>
+<% current_user.invited_events.each do |event| %>
+<ul>
+  <li>
+    <%= event.title%> at <%= event.date%> 
+    <%= button_to "RSVP", rsvp_event_path(event), method: :post %>
+  </li>
+</ul>
+<%end%>
