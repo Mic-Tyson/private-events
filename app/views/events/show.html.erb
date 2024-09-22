@@ -1,5 +1,6 @@
 <% if user_signed_in? %>
   <h3>User <%= current_user.id %></h3>
+  <%= link_to "User home", user_path(current_user) %>
 <% end %>
 
 <h1><%= @event.title %></h1>
@@ -7,21 +8,26 @@
   <% if @event.expired? %>
     (expired)
   <% end %>
+  Held by <%= @event.creator.id || "anonymous"%>
 </p>
 
 <div>Attendees
   <ul>
-    <% @event.attendees.each do |attendee| %>
+    <% @event.confirmed_users.each do |attendee| %>
       <li><%= attendee.id %></li>
     <% end %>
   </ul>
 </div>
 
 <% unless @event.expired? %>
-  <% if @event.attendees.include?(current_user) %>
+  <% if @event.confirmed_users.include?(current_user) %>
     <%= button_to "Remove RSVP", remove_rsvp_event_path(@event), method: :delete %>
   <% else %>
     <%= button_to "RSVP", rsvp_event_path(@event), method: :post %>
+  <% end %>
+  <% if @event.creator == current_user %>
+    <%= link_to "Edit Event", edit_event_path(@event) %>
+    <%= render "invite", event: @event %>
   <% end %>
 <%end%>
 
