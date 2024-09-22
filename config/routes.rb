@@ -10,5 +10,15 @@ Rails.application.routes.draw do
   root "events#index"
 
   # Define RESTful routes
-  resources :events
+  resources :users
+
+  # Events routes with additional custom actions
+  resources :events do
+    member do
+      post 'rsvp'
+      delete 'remove_rsvp'
+      post 'invite'
+      delete 'delete'
+    end
+  end
 end
