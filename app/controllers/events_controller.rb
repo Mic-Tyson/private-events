@@ -7,7 +7,8 @@ class EventsController < ApplicationController
   def create
     @event = current_user.events.build(event_params)
     if @event.save
-      @event.attendees << current_user
+      event_user = @event.events_users.find_or_initialize_by(user_id: current_user.id)
+      event_user.confirmed!
       redirect_to @event, notice: 'Event was saved'
     else
       flash.now[:error] = @event.errors.full_messages.to_sentence
@@ -25,24 +26,18 @@ class EventsController < ApplicationController
 
   def rsvp
     @event = Event.find(params[:id])
-    if user_signed_in?
-      if @event.attendees.include?(current_user)
-        redirect_to @event, alert: 'You have already RSVP\'d to this event.'
-      else
-        @event.attendees << current_user
-        redirect_to @event, notice: 'You have successfully RSVP\'d to the event.'
-      end
-    else
-      session[:user_return_to] = request.fullpath
-      Rails.logger.debug "Storing RSVP path: #{request.fullpath}"
-    end
+    return if @event.confirmed_users.include?(current_user)
+
+    event_user = @event.events_users.find_or_initialize_by(user_id: current_user.id)
+    event_user.confirmed!
+    redirect_to @event, notice: 'You have successfully RSVP\'d to the event.'
   end
 
   def remove_rsvp
     @event = Event.find(params[:id])
-    return unless @event.attendees.include?(current_user)
+    return unless @event.confirmed_users.include?(current_user)
 
-    @event.attendees.delete(current_user)
+    @event.attendees.destroy(current_user)
     redirect_to @event, notice: 'You have successfully cancelled your RSVP.'
   end
 
@@ -66,6 +61,26 @@ class EventsController < ApplicationController
     else
       flash.now[:error] = @event.errors.full_messages.to_sentence
     end
+  end
+
+  def invite
+    @event = Event.find(params[:id])
+    @user = User.find(params[:query])
+
+    events_user = @event.events_users.find_by(user: @user)
+
+    if events_user && (events_user.invited || events_user.confirmed)
+      redirect_to @event, alert: 'User has already been invited to the event.'
+    else
+      @event.attendees << @user
+      redirect_to @event, notice: 'User has been successfully invited to the event.'
+    end
+  rescue ActiveRecord::RecordNotFound
+    redirect_to @event, alert: 'User or event not found.'
+  end
+
+  def confirmed_attendees
+    attendees.joins(:events_users).merge(EventsUser.confirmed)
   end
 
   private
